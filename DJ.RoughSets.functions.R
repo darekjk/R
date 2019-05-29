@@ -3,7 +3,12 @@
 # Author: Dariusz Jankowski
 # Licenacja użytkowania: na zajęciach SI - Politechnika Białostocka - semestr 2017/2018
 
+require(caret)
+require(data.table)
+require(sets)
 require(RoughSets)
+require(knitr)
+require(kableExtra)
 
 # Konwersja zagnieżdzownej nazwanej listy na data.frame
 DJ.namedlistOfLists.as.data.frame <- function(list, colnames = c())
