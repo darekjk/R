@@ -10,7 +10,7 @@ require(RoughSets)
 require(knitr)
 require(kableExtra)
 
-# Konwersja zagnieżdzownej nazwanej listy na data.frame
+# Convert named list to data.frame
 DJ.namedlistOfLists.as.data.frame <- function(list, colnames = c())
 {
   rel = list
@@ -22,10 +22,8 @@ DJ.namedlistOfLists.as.data.frame <- function(list, colnames = c())
     d1 <- rbind(d1, data.frame(L1=rel.names[i])) 
   }
   
-  #d1
-  
   d2 <- data.frame(L2=c() ,stringsAsFactors=FALSE) 
-  #d2
+
   for(i in 1:length(rel) ) 
   {
     s <- ""
@@ -38,7 +36,7 @@ DJ.namedlistOfLists.as.data.frame <- function(list, colnames = c())
     d2<- rbind(d2, data.frame(L2=s)) 
     
   }
-  #d2
+
   d3 <- cbind(d1, d2)
   colnames(d3) <- colnames
   d3
@@ -134,8 +132,8 @@ DJ.attr_and_dec <- function(decisionTable, listOf.cond.attr)
 
 DJ.rule.RST.toString <- function(rule)
 {
-  if(as.set(class(rule)) != set("RuleSetRST","list")) { stop("Błędny parametr") }
-  if(length(rule)>1) { stop("Błędna liczba reguł")}
+  if(as.set(class(rule)) != set("RuleSetRST","list")) { stop("Argument must be of type RuleSetRST / list") }
+  if(length(rule)>1) { stop("Inavlid count of rules")}
   #rule = rules[3] # only to debug
   
   cols <- attr(rule, "colnames")
@@ -173,9 +171,8 @@ DJ.rule.RST.toString <- function(rule)
 
 DJ.rules.RST.toString <- function(rules)
 {
-  if(as.set(class(rules)) != set("RuleSetRST","list")) { stop("Błędny parametr")}
-  
-  
+  if(as.set(class(rules)) != set("RuleSetRST","list")) { stop("Argument must be of type RuleSetRST / list")}
+    
   str <- DJ.rule.RST.toString(rules[1])
   if(length(rules)>1)
     for(i in 2:length(rules)) 
