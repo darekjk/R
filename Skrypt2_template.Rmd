@@ -1,0 +1,200 @@
+---
+title: "Skrypt 1"
+output:
+  html_document: 
+    df_print: kable
+---
+
+Celem zajęć jest poznanie wybranych pojęć teorii zbiorów przybliżonych (ang. rough sets). Jest ona źródłem bardzo cennych zastosowań w obszarze sztucznej inteligencji i najszerzej znanym, w skali autentycznie światowej, osiągnięciem polskiej informatyki.
+
+Pomoce do zadań: 
+
+- Elementarne wprowadzenie do metod zbiorów przybliżonych
+http://ryszardtadeusiewicz.natemat.pl/150285,polska-wyspa-w-archipelagu-sztucznejinteligencji-zbiory-przyblizone
+
+- Sesja poświęcona przedstawieniu praktycznych zastosowań metod zbiorów
+przybliżonych https://www.youtube.com/watch?v=2SrYmksVWyE&feature=youtu.be
+
+- Pakiet RoughSets: https://cran.r-project.org/web/packages/RoughSets/index.html
+
+- Zbiory przybliżone - wprowadzenie do pakietu RoughSets.pdf (plik na CEZ – ie
+przygotowany przez Dr hab. Piotra Hońko)
+
+- sets: https://www.rdocumentation.org/packages/sets/versions/1.0-18/topics/set
+- https://www.rdocumentation.org/packages/sets/versions/1.0-18
+
+# ZADANIE
+
+Na tablicy decyzyjnej zaproponowanej przez prowadzącego zajęcia wykonać zadania od 1 do 6.
+Zbiór: car.csv
+Skrypt przetasowuje cały zbiór i wybiera pierwsze 100 rekordów, które należy przeanalizować.
+
+Z uwagi na autorskie funkcje, które mają pomóc w wizualizacji i zrozumieniu wyników, 
+
+```{r echo=FALSE}
+# Instalacja R i konfiguracja:
+# https://cran.r-project.org/doc/manuals/R-admin.html#The-Windows-toolset
+# RTools: https://cran.r-project.org/bin/windows/Rtools/
+session.info <-sessionInfo()
+# getOption("defaultPackages")
+# Sys.getenv("R_LIBS_USER")
+# getwd()
+```
+
+
+
+```{r setup, echo=TRUE, cache=FALSE}
+# pakiet potrzebny przy generowaniu PDF z latex
+#devtools::install_github("rstudio/rmarkdown")
+
+# 3 metody sprawdzenia czy pakiet jest zainstalowany (do wyboru)
+pkgTest <- function(x)
+  {
+    if (!require(x, character.only = TRUE))
+    {
+      install.packages(x,dep=TRUE)
+        if(!require(x,character.only = TRUE)) stop(paste0("Package ",x,"not found"))
+    }
+  }
+
+# Do sprawdzenia warunku, można również użyć:
+# if(!is.element("RoughSets", installed.packages()[,1]))
+# if("RoughSets" %in% rownames(installed.packages()) == FALSE)
+
+# Użycie:
+pkgTest("caret")
+pkgTest("knitr")
+pkgTest("kableExtra")
+pkgTest("data.table")
+pkgTest("sets")
+pkgTest("RoughSets")
+
+
+# Załaduj bibliotekę
+library(knitr)
+library(caret)
+#library(kableExtra) # uwaga: przesłania %>% z pakietu sets
+#detach("package:kableExtra", unload=TRUE)
+library(sets)
+library(RoughSets)
+#source("DJ.RoughSets.bugFixes.R")
+source("https://raw.githubusercontent.com/darekjk/R/master/DJ.RoughSets.bugFixes.R")
+#source("DJ.RoughSets.functions.R")
+source("https://raw.githubusercontent.com/darekjk/R/master/DJ.RoughSets.functions.R")
+
+# Wczytaj dane https://cez2.wi.pb.edu.pl/moodle/pluginfile.php/15593/mod_resource/content/1/car.csv
+
+filename = "car.csv"
+path <- paste0("https://raw.githubusercontent.com/darekjk/AIdata/master/",filename)
+if(!file.exists(filename))  
+  download.file(path, filename, method = "auto")
+
+
+dane <- read.csv(file = filename, header = TRUE, fileEncoding = "UTF-8", sep=",")
+set.seed(500)
+# Przetasowanie pobranej  tabeli
+dt.Shuffled = dane[sample(nrow(dane)), ]
+
+# Ograniczenie tabeli do pierwszych 100 rekordów
+dt = dt.Shuffled[1:100,]
+dt
+
+dane = NULL; filename = NULL; path = NULL; dt.Shuffled = NULL;
+```
+
+
+```{r ,cache=FALSE}
+DT=NULL; DT.A=NULL; 
+DT.shortColNames = c("b","m","d","p","l","s","class")
+
+# Utworzenie tablicy decyzyjnej w formacie pakietu Rough Sets
+A = c(1:6)
+AD = c(1:7) # A u D
+DT = RoughSets::SF.asDecisionTable(dt, decision.attr = ncol(dt), indx.nominal = AD)
+
+```
+
+
+1. Wypisać klasy nieodróżnialności ze względu na zbiór atrybutów A
+
+```{r echo=F}
+IND.A <- tu wpisz funkcję obliczającą klasy nierozróznialności
+
+# wizualizacja wyników 
+IND.A.reDF <- DJ.IND.relation.as.data.frame(IND.A$IND.relation,attr.cond.set.name = "A",colnames = colnames(DT[,A]))
+knitr::kable(IND.A.reDF, caption = "Relacja nierozróznialności dla zbioru wszystkich atrybutów warunkowych A")
+
+```
+
+
+2. Wypisać klasy decyzyjne i podać dolne i górne aproksymacje tych klas ze względu na zbiór A wszystkich atrybutów warunkowych.
+
+
+```{r echo=FALSE}
+print("Klasy decyzyjne: ")
+as.vector(unique(DT[ ,'class']))
+
+LU.A = tu wpisz funkcję obliczającą dolną i górną aproksymację
+
+# Wizualizacja wyników - obiekty dolnej aproksymacji dla poszczególnych klas
+DJ.LU.extract.listOfObjects(LU.A$lower.approximation, "unacc")
+# podobnie dokonaj wizualizacji dolnej i górnej aproksymacji dla pozostałych klas 
+# dodaj stosowne opisy
+
+```
+
+3. Opisać na podstawie danych i atrybutów ze zbioru A dolne aproksymacje i obszary brzegowe tych klas.
+
+
+
+4. Wyznaczyć obszar pozytywny (sumę dolnych aproksymacji klas decyzyjnych) ze względu na zbiór A.
+
+```{r, cache=FALSE}
+POS.A =  tu wpisz funkcję obliczającą obszar pozytywny
+POS.A
+```
+
+5. Z wykorzystaniem macierzy rozróżnialności wyznaczyć rdzeń i co najmniej jeden redukt.
+
+
+```{r cache=FALSE}
+DT.short = DT
+colnames(DT.short) <- DT.shortColNames
+DM.A = tu wpisz funkcję obliczającą macierz rozróżnialności
+
+# Jeśli chcesz wyświetlić:
+#DJ.discernibility.mat.RST.as.ktable(DM.A)
+
+# Wyświetlenie macierzy dla wybranych wierszy i kolumn, np. gdy macierz będzie dosyć duża
+# DJ.discernibility.mat.RST.as.ktable(DM.A, indx.rows = c(1:10), indx.columns = c(1:2), format = 'markdown', format.args = NULL)
+
+DJ.computeCore.from.discernibility.mat.RST(DM.A)
+
+RED.A = tu wpisz funkcję obliczającą redukty i rdzeń na podstawie macierzy rozróżnialności
+
+# BUG FIXED: wyliczanie core
+reductList <- convertCNFtoDNF(DM.A$disc.list)
+RED.A$core = DJ.computeCore(reductList)
+
+RED.A
+```
+
+
+6. Wygenerować reguły z wykorzystaniem algorytmu LEM2
+
+
+```{r, cache=FALSE}
+rules <- tu wpisz funkcję generującą reguły na podstawie algorytmu LEM2
+
+# wizualizacja reguł
+DJ.rules.RST.toString(rules)
+
+```
+
+
+### INFORMACJE O SYSTEMIE
+
+```{r}
+session.info
+```
+
