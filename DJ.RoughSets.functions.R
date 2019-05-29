@@ -1,7 +1,7 @@
+# Some extended functions of RoughSets library dedicated for my students in Bialystok Univeristy of Technology
 
-# Inne funkcje pomocnicze
-# Author: Dariusz Jankowski
-# Licenacja użytkowania: na zajęciach SI - Politechnika Białostocka - semestr 2017/2018
+# Author:  Dariusz Jankowski
+# License: MIT
 
 require(caret)
 require(data.table)
