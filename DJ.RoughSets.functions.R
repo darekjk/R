@@ -1,7 +1,8 @@
 
-# Inne funkcje pomocnicze
+# Extend RoughSets library
+
 # Author: Dariusz Jankowski
-# Licenacja użytkowania: na zajęciach SI - Politechnika Białostocka - semestr 2017/2018
+# License: For academic use only
 
 require(RoughSets)
 
@@ -11,16 +12,14 @@ DJ.namedlistOfLists.as.data.frame <- function(list, colnames = c())
   rel = list
   rel.names = names(rel)
   
-  d1 <- data.frame(L1=c() ,stringsAsFactors=FALSE) 
+  d1 <- data.frame(L1=c(), stringsAsFactors=FALSE) 
   for(i in 1:length(rel.names))
   {
     d1 <- rbind(d1, data.frame(L1=rel.names[i])) 
   }
   
-  #d1
-  
-  d2 <- data.frame(L2=c() ,stringsAsFactors=FALSE) 
-  #d2
+  d2 <- data.frame(L2=c(), stringsAsFactors=FALSE) 
+ 
   for(i in 1:length(rel) ) 
   {
     s <- ""
@@ -33,7 +32,7 @@ DJ.namedlistOfLists.as.data.frame <- function(list, colnames = c())
     d2<- rbind(d2, data.frame(L2=s)) 
     
   }
-  #d2
+  
   d3 <- cbind(d1, d2)
   colnames(d3) <- colnames
   d3
@@ -47,7 +46,7 @@ DJ.IND.relation.as.data.frame <- function(rel, attr.cond.set.name ="B", colnames
   DJ.namedlistOfLists.as.data.frame(rel, rel.colnames)
 }
 
-#DM=DM.A; indx.rows = c(100:101); indx.columns = c(1:2); format = "markdown"; format.args = NULL  
+# Example of input values: DM=DM.A; indx.rows = c(100:101); indx.columns = c(1:2); 
 DJ.discernibility.mat.RST.as.ktable <- function(DM, indx.rows = NULL, indx.columns = NULL, format= 'markdown', format.args = NULL )
 {
   if(is.null(indx.columns))indx.columns = 1:ncol(DM$disc.mat)
@@ -62,11 +61,11 @@ DJ.discernibility.mat.RST.as.ktable <- function(DM, indx.rows = NULL, indx.colum
     {
       item <- dm[row,col]
       item <- item[[1]]
-      #print(paste(row,col,length(item),item))
+      # print(paste(row,col,length(item),item))
       if(length(item)>1)
       {
         dm[row,col] <- paste0("{",item[1])
-        for(i in 2:length(item)) #print(cat(dm[row,col], ",", item[i]))
+        for(i in 2:length(item))  # print(cat(dm[row,col], ",", item[i]))
         {
           s = dm[row,col]
           dm[row,col] <-  paste0(s, ",", item[i])
@@ -80,11 +79,11 @@ DJ.discernibility.mat.RST.as.ktable <- function(DM, indx.rows = NULL, indx.colum
         
         if(!is.null(item) && (is.na(item) || length(item)==0))
         { item <- "" }
-        dm[row,col] <- item #paste0("{",item,"}")
+        dm[row,col] <- item  # paste0("{",item,"}")
       }
     }
     
-    #dm[,col] = as.factor(dm[,col])
+    # dm[,col] = as.factor(dm[,col])
     dm[col,col] <- ""
   }
   dm <- as.data.frame(dm, row.names = 1:nrow(dm))
