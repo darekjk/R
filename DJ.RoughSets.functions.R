@@ -1,16 +1,11 @@
-# Some extended functions of RoughSets library dedicated for my students in Bialystok Univeristy of Technology
 
-# Author:  Dariusz Jankowski
-# License: MIT
+# Inne funkcje pomocnicze
+# Author: Dariusz Jankowski
+# Licenacja użytkowania: na zajęciach SI - Politechnika Białostocka - semestr 2017/2018
 
-require(caret)
-require(data.table)
-require(sets)
 require(RoughSets)
-require(knitr)
-require(kableExtra)
 
-# Convert named list to data.frame
+# Konwersja zagnieżdzownej nazwanej listy na data.frame
 DJ.namedlistOfLists.as.data.frame <- function(list, colnames = c())
 {
   rel = list
@@ -22,8 +17,10 @@ DJ.namedlistOfLists.as.data.frame <- function(list, colnames = c())
     d1 <- rbind(d1, data.frame(L1=rel.names[i])) 
   }
   
+  #d1
+  
   d2 <- data.frame(L2=c() ,stringsAsFactors=FALSE) 
-
+  #d2
   for(i in 1:length(rel) ) 
   {
     s <- ""
@@ -36,7 +33,7 @@ DJ.namedlistOfLists.as.data.frame <- function(list, colnames = c())
     d2<- rbind(d2, data.frame(L2=s)) 
     
   }
-
+  #d2
   d3 <- cbind(d1, d2)
   colnames(d3) <- colnames
   d3
@@ -101,9 +98,26 @@ DJ.computeCore.from.discernibility.mat.RST <- function(DM)
   cat(paste(unique(unlist(DM$disc.list[which(lengths(DM$disc.list)==1)]))))
 }
 
-DJ.LU.extract.listOfObjects <- function(lowerOrUpperApproximation, decision.name)
+DJ.LU.extract.listOfObjects <- function(lowerOrUpperApproximation, decision.name, sort_result=TRUE, sort_decreasing=FALSE)
 {
-  sort(unname(lowerOrUpperApproximation[[decision.name]]))
+  result = unname(lowerOrUpperApproximation[[decision.name]])
+  if (sort_result)
+  {
+    result = sort(result, decreasing=sort_decreasing)
+  }
+  result
+}
+
+# concat lists like sets
+DJ.combine.lists <- function(listOfLists, sort_result=TRUE, sort_decreasing=FALSE)
+{
+  if(!any(class(listOfLists) %in% c("list"))) { stop("Invalid class of list") }
+  result = unique(do.call(c, listOfLists))
+  if (sort_result)
+  {
+    result = sort(result, decreasing=sort_decreasing)
+  }
+  result
 }
 
 DJ.aggregate.data.table.by.column <- function(data)
@@ -132,8 +146,8 @@ DJ.attr_and_dec <- function(decisionTable, listOf.cond.attr)
 
 DJ.rule.RST.toString <- function(rule)
 {
-  if(as.set(class(rule)) != set("RuleSetRST","list")) { stop("Argument must be of type RuleSetRST / list") }
-  if(length(rule)>1) { stop("Inavlid count of rules")}
+  if(as.set(class(rule)) != set("RuleSetRST","list")) { stop("Błędny parametr") }
+  if(length(rule)>1) { stop("Błędna liczba reguł")}
   #rule = rules[3] # only to debug
   
   cols <- attr(rule, "colnames")
@@ -171,8 +185,9 @@ DJ.rule.RST.toString <- function(rule)
 
 DJ.rules.RST.toString <- function(rules)
 {
-  if(as.set(class(rules)) != set("RuleSetRST","list")) { stop("Argument must be of type RuleSetRST / list")}
-    
+  if(as.set(class(rules)) != set("RuleSetRST","list")) { stop("Błędny parametr")}
+  
+  
   str <- DJ.rule.RST.toString(rules[1])
   if(length(rules)>1)
     for(i in 2:length(rules)) 
