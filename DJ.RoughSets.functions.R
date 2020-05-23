@@ -191,7 +191,7 @@ DJ.rules.toString.RST <- function(rules)
   if(length(rules)>1)
     for(i in 2:length(rules)) 
     {
-      rule <- DJ.rule.RST.toString(rules[i])
+      rule <- DJ.rule.toString.RST(rules[i])
       str <- rbind(str, rule)
     }
   
