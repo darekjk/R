@@ -19,7 +19,7 @@ DJ.namedlistOfLists.as.data.frame <- function(list, colnames = c())
   }
   
   d2 <- data.frame(L2=c(), stringsAsFactors=FALSE) 
- 
+  
   for(i in 1:length(rel) ) 
   {
     s <- ""
@@ -47,7 +47,7 @@ DJ.IND.relation.as.data.frame <- function(rel, attr.cond.set.name ="B", colnames
 }
 
 # Example of input values: DM=DM.A; indx.rows = c(100:101); indx.columns = c(1:2); 
-DJ.discernibility.mat.RST.as.ktable <- function(DM, indx.rows = NULL, indx.columns = NULL, format= 'markdown', format.args = NULL )
+DJ.discernibility.mat.as.ktable.RST <- function(DM, indx.rows = NULL, indx.columns = NULL, format= 'markdown', format.args = NULL )
 {
   if(is.null(indx.columns))indx.columns = 1:ncol(DM$disc.mat)
   if(is.null(indx.rows))indx.rows = 1:nrow(DM$disc.mat)
@@ -143,7 +143,7 @@ DJ.attr_and_dec <- function(decisionTable, listOf.cond.attr)
   c(listOf.cond.attr, ncol(decisionTable))
 }
 
-DJ.rule.RST.toString <- function(rule)
+DJ.rule.toString.RST <- function(rule)
 {
   if(as.set(class(rule)) != set("RuleSetRST","list")) { stop("Błędny parametr") }
   if(length(rule)>1) { stop("Błędna liczba reguł")}
@@ -182,12 +182,12 @@ DJ.rule.RST.toString <- function(rule)
   df
 }
 
-DJ.rules.RST.toString <- function(rules)
+DJ.rules.toString.RST <- function(rules)
 {
   if(as.set(class(rules)) != set("RuleSetRST","list")) { stop("Błędny parametr")}
   
   
-  str <- DJ.rule.RST.toString(rules[1])
+  str <- DJ.rule.toString.RST(rules[1])
   if(length(rules)>1)
     for(i in 2:length(rules)) 
     {
