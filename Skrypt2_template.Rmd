@@ -77,14 +77,13 @@ library(caret)
 #detach("package:kableExtra", unload=TRUE)
 library(sets)
 library(RoughSets)
-#source("DJ.RoughSets.bugFixes.R")
-source("https://raw.githubusercontent.com/darekjk/R/master/DJ.RoughSets.bugFixes.R")
+
 #source("DJ.RoughSets.functions.R")
 source("https://raw.githubusercontent.com/darekjk/R/master/DJ.RoughSets.functions.R")
 
 # Wczytaj dane https://cez2.wi.pb.edu.pl/moodle/pluginfile.php/15593/mod_resource/content/1/car.csv
 
-filename = "car.csv"
+filename = "grypa_short.csv"
 path <- paste0("https://raw.githubusercontent.com/darekjk/AIdata/master/",filename)
 if(!file.exists(filename))  
   download.file(path, filename, method = "auto")
@@ -93,13 +92,18 @@ if(!file.exists(filename))
 dane <- read.csv(file = filename, header = TRUE, fileEncoding = "UTF-8", sep=",")
 set.seed(500)
 # Przetasowanie pobranej  tabeli
-dt.Shuffled = dane[sample(nrow(dane)), ]
+#dt.Shuffled = dane[sample(nrow(dane)), ]
 
 # Ograniczenie tabeli do pierwszych 100 rekordów
-dt = dt.Shuffled[1:100,]
-dt
+#dt = dt.Shuffled[1:100,]
+dt = dane
 
 dane = NULL; filename = NULL; path = NULL; dt.Shuffled = NULL;
+```
+
+
+```{r}
+dt
 ```
 
 
@@ -108,8 +112,8 @@ DT=NULL; DT.A=NULL;
 DT.shortColNames = c("b","m","d","p","l","s","class")
 
 # Utworzenie tablicy decyzyjnej w formacie pakietu Rough Sets
-A = c(1:6)
-AD = c(1:7) # A u D
+A = c(2:5)
+AD = c(1:6) # A u D
 DT = RoughSets::SF.asDecisionTable(dt, decision.attr = ncol(dt), indx.nominal = AD)
 
 ```
@@ -118,8 +122,8 @@ DT = RoughSets::SF.asDecisionTable(dt, decision.attr = ncol(dt), indx.nominal = 
 1. Wypisać klasy nieodróżnialności ze względu na zbiór atrybutów A
 
 ```{r echo=F}
-IND.A <- tu wpisz funkcję obliczającą klasy nierozróznialności
-
+IND.A <- BC.IND.relation.RST(DT, A) #  tu wpisz funkcję obliczającą klasy nierozróznialności
+IND.A
 # wizualizacja wyników 
 IND.A.reDF <- DJ.IND.relation.as.data.frame(IND.A$IND.relation,attr.cond.set.name = "A",colnames = colnames(DT[,A]))
 knitr::kable(IND.A.reDF, caption = "Relacja nierozróznialności dla zbioru wszystkich atrybutów warunkowych A")
@@ -132,12 +136,12 @@ knitr::kable(IND.A.reDF, caption = "Relacja nierozróznialności dla zbioru wszy
 
 ```{r echo=FALSE}
 print("Klasy decyzyjne: ")
-as.vector(unique(DT[ ,'class']))
+as.vector(unique(DT[ ,'grypa']))
 
-LU.A = tu wpisz funkcję obliczającą dolną i górną aproksymację
-
+LU.A = BC.LU.approximation.RST(DT, IND.A) #tu wpisz funkcję obliczającą dolną i górną aproksymację
+LU.A
 # Wizualizacja wyników - obiekty dolnej aproksymacji dla poszczególnych klas
-DJ.LU.extract.listOfObjects(LU.A$lower.approximation, "unacc")
+DJ.LU.extract.listOfObjects(LU.A$lower.approximation, "tak" )
 # podobnie dokonaj wizualizacji dolnej i górnej aproksymacji dla pozostałych klas 
 # dodaj stosowne opisy
 
@@ -171,11 +175,6 @@ DM.A = tu wpisz funkcję obliczającą macierz rozróżnialności
 DJ.computeCore.from.discernibility.mat.RST(DM.A)
 
 RED.A = tu wpisz funkcję obliczającą redukty i rdzeń na podstawie macierzy rozróżnialności
-
-# BUG FIXED: wyliczanie core
-reductList <- convertCNFtoDNF(DM.A$disc.list)
-RED.A$core = DJ.computeCore(reductList)
-
 RED.A
 ```
 
