@@ -225,8 +225,8 @@ DJ.rule.toLERSformat.RST <- function(rule)
 DJ.rules.toString.RST <- function(rules, output_format="LERS")
 {
   if(as.set(class(rules)) != set("RuleSetRST","list")) { stop("Błędny parametr")}
-  output_format = toupper(output_format)
-  print(output_format)
+  #output_format = toupper(output_format)
+  #print(output_format)
   if(output_format == "LERS") {formatter = DJ.rule.toLERSformat.RST}
   else {formatter=DJ.rule.toString.RST}
   
