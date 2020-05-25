@@ -80,6 +80,8 @@ library(RoughSets)
 
 #source("DJ.RoughSets.functions.R")
 source("https://raw.githubusercontent.com/darekjk/R/master/DJ.RoughSets.functions.R")
+source("https://raw.githubusercontent.com/janusza/RoughSets/master/R/IOFunctions.R")   # import funkcji niedostepnych z poziomu biblioteki RoughSets, m.in. ObjectFactory
+source("https://raw.githubusercontent.com/darekjk/R/master/LEM2.R")
 
 # Wczytaj dane https://cez2.wi.pb.edu.pl/moodle/pluginfile.php/15593/mod_resource/content/1/car.csv
 
@@ -91,7 +93,7 @@ if(!file.exists(filename))
 
 dane <- read.csv(file = filename, header = TRUE, fileEncoding = "UTF-8", sep=",")
 set.seed(500)
-# Przetasowanie pobranej  tabeli
+# Przetasowanie pobranej tabeli
 #dt.Shuffled = dane[sample(nrow(dane)), ]
 
 # Ograniczenie tabeli do pierwszych 100 rekordów
@@ -167,7 +169,7 @@ colnames(DT.short) <- DT.shortColNames
 DM.A = tu wpisz funkcję obliczającą macierz rozróżnialności
 
 # Jeśli chcesz wyświetlić:
-#DJ.discernibility.mat.RST.as.ktable(DM.A)
+# DJ.discernibility.mat.RST.as.ktable(DM.A)
 
 # Wyświetlenie macierzy dla wybranych wierszy i kolumn, np. gdy macierz będzie dosyć duża
 # DJ.discernibility.mat.RST.as.ktable(DM.A, indx.rows = c(1:10), indx.columns = c(1:2), format = 'markdown', format.args = NULL)
@@ -186,7 +188,7 @@ RED.A
 rules <- tu wpisz funkcję generującą reguły na podstawie algorytmu LEM2
 
 # wizualizacja reguł
-DJ.rules.RST.toString(rules)
+DJ.rules.toString.RST(rules)
 
 ```
 
