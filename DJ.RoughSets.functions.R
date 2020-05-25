@@ -182,16 +182,59 @@ DJ.rule.toString.RST <- function(rule)
   df
 }
 
-DJ.rules.toString.RST <- function(rules)
+DJ.rule.toLERSformat.RST <- function(rule)
+{
+  if(as.set(class(rule)) != set("RuleSetRST","list")) { stop("Błędny parametr") }
+  if(length(rule)>1) { stop("Błędna liczba reguł")}
+  #rule = rules[3] # only to debug
+  
+  cols <- attr(rule, "colnames")
+  dec <- attr(rule, "dec.attr")
+  l <- rule[[1]]
+  str <- "("
+  if(is.vector(l$idx))
+  {
+    str <- paste0(str, cols[ l$idx[1]  ],", ", l$values[1])
+    
+    if(length(l$idx)>1)
+    {
+      for(i in 2:length(l$idx))
+      {
+        str <- paste0(str, ") & (", cols[ l$idx[i] ],", ", l$values[i])
+      }
+    }
+  }else{
+    #  str <- paste0(str, cols[l$idx],"=", l$values)
+    stop("rule $idx is not a vector")
+  }
+  
+  str <- paste0(str, ") -> (", dec,", ", l$consequent, ")")
+  
+  #c("rule"= str, "support"= l$support, "laplace"= l$laplace )
+  df <- as.data.frame(str)
+  
+  df <- cbind(df,  length(l$support) )
+  df <- cbind(df,  l$laplace[1])
+  colnames(df) <- c("rule", "supportSize", "laplace")
+  rownames(df) <- c()
+  
+  df
+}
+
+
+DJ.rules.toString.RST <- function(rules, output_format="LERS")
 {
   if(as.set(class(rules)) != set("RuleSetRST","list")) { stop("Błędny parametr")}
+  output_format = toupper(output_format)
+  print(output_format)
+  if(output_format == "LERS") {formatter = DJ.rule.toLERSformat.RST}
+  else {formatter=DJ.rule.toString.RST}
   
-  
-  str <- DJ.rule.toString.RST(rules[1])
+  str <- formatter(rules[1])
   if(length(rules)>1)
     for(i in 2:length(rules)) 
     {
-      rule <- DJ.rule.toString.RST(rules[i])
+      rule <- formatter(rules[i])
       str <- rbind(str, rule)
     }
   
