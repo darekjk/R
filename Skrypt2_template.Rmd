@@ -101,6 +101,7 @@ set.seed(500)
 dt = dane
 
 dane = NULL; filename = NULL; path = NULL; dt.Shuffled = NULL;
+
 ```
 
 
@@ -188,7 +189,7 @@ RED.A
 rules <- tu wpisz funkcję generującą reguły na podstawie algorytmu LEM2
 
 # wizualizacja reguł
-DJ.rules.toString.RST(rules)
+DJ.rules.toString.RST(rules, output_format = "IFTHEN", show_conflict_rules = TRUE)
 
 ```
 
