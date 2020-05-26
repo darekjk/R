@@ -143,7 +143,112 @@ DJ.attr_and_dec <- function(decisionTable, listOf.cond.attr)
   c(listOf.cond.attr, ncol(decisionTable))
 }
 
-DJ.rule.toString.RST <- function(rule)
+
+DJ.ruleKeyValue.format <- function(key, value, output_format="LERS")
+{
+  
+  if(output_format == "LERS")
+  {
+    start_c = "("
+    middle_c = ", "
+    end_c = ")"
+  }
+  else
+  {
+    start_c = " "
+    middle_c = "="
+    end_c = " "
+  }
+  
+  str = paste0(start_c, key, middle_c, value, end_c)
+  
+  return(str)
+}
+  
+  
+DJ.rulePart1.format <- function(cols, l, output_format="LERS")
+{
+  if(output_format == "LERS")
+  {
+    start_rule = "" # nie trzeba, bo każda para klucz/wartość zawiera nawiasy
+    start_c = "("
+    middle_c = ","
+    end_c = ")"
+    and_c = " & "
+    then_c = " -> "
+  }
+  else
+  {
+    start_rule = "IF "
+    start_c = " "
+    middle_c = "="
+    end_c = " "
+    and_c = " AND "
+    then_c = " THEN "
+  }
+  
+  str <- start_rule
+  if(is.vector(l$idx))
+  {
+    str1 = DJ.ruleKeyValue.format(key=cols[ l$idx[1]  ],value=l$values[1], output_format = output_format)
+    str <- paste0(str, str1)
+    
+    if(length(l$idx)>1)
+    {
+      for(i in 2:length(l$idx))
+      {
+        str1 = DJ.ruleKeyValue.format(key=cols[ l$idx[i]  ],value=l$values[i], output_format = output_format)
+        str <- paste0(str, and_c, str1)
+      }
+    }
+  }else{
+    #  str <- paste0(str, cols[l$idx],"=", l$values)
+    stop("rule $idx is not a vector")
+  }
+  
+  str <- paste0(str, then_c)
+  
+  return(str)
+  
+}
+
+DJ.rulePart2.format <- function(dec, l, output_format="LERS")
+{
+  if(output_format == "LERS")
+  {
+    or_c = " | "
+  }
+  else
+  {
+    or_c = " OR "
+  }
+  
+  str <- ""
+  if(is.vector(l$all_consequents))
+  {
+    str1 = DJ.ruleKeyValue.format(key=dec, value=l$all_consequents[1], output_format = output_format)
+    str <- paste0(str, str1)
+    
+    if(length(l$all_consequents)>1)
+    {
+      for(i in 2:length(l$all_consequents))
+      {
+        str1 = DJ.ruleKeyValue.format(key=dec, value=l$all_consequents[i], output_format = output_format)
+        str <- paste0(str, or_c, str1)
+      }
+    }
+  }
+  else
+  {
+    stop("rule $idx is not a vector")
+  }
+  
+  return(str)
+  
+}
+
+
+DJ.rule.toString.RST <- function(rule, show_conflict_rules=TRUE, output_format = "LERS")
 {
   if(as.set(class(rule)) != set("RuleSetRST","list")) { stop("Błędny parametr") }
   if(length(rule)>1) { stop("Błędna liczba reguł")}
@@ -152,24 +257,18 @@ DJ.rule.toString.RST <- function(rule)
   cols <- attr(rule, "colnames")
   dec <- attr(rule, "dec.attr")
   l <- rule[[1]]
-  str <- "IF "
-  if(is.vector(l$idx))
-  {
-    str <- paste0(str, cols[ l$idx[1]  ],"=", l$values[1])
-    
-    if(length(l$idx)>1)
-    {
-      for(i in 2:length(l$idx))
-      {
-        str <- paste0(str, " AND ", cols[ l$idx[i] ],"=", l$values[i])
-      }
-    }
-  }else{
-    #  str <- paste0(str, cols[l$idx],"=", l$values)
-    stop("rule $idx is not a vector")
-  }
+  str1 = DJ.rulePart1.format(cols, l, output_format = output_format)
   
-  str <- paste0(str, " THEN ", dec,"=", l$consequent)
+  if(show_conflict_rules)
+  {
+    str2 = DJ.rulePart2.format(dec, l, output_format = output_format)
+  }
+  else
+  {
+    str2 = DJ.ruleKeyValue.format(key=dec ,value=l$consequent, output_format = output_format)
+  }
+
+  str <- paste0(str1, str2)
   
   #c("rule"= str, "support"= l$support, "laplace"= l$laplace )
   df <- as.data.frame(str)
@@ -182,60 +281,19 @@ DJ.rule.toString.RST <- function(rule)
   return(df)
 }
 
-DJ.rule.toLERSformat.RST <- function(rule)
-{
-  if(as.set(class(rule)) != set("RuleSetRST","list")) { stop("Błędny parametr") }
-  if(length(rule)>1) { stop("Błędna liczba reguł")}
-  #rule = rules[3] # only to debug
-  
-  cols <- attr(rule, "colnames")
-  dec <- attr(rule, "dec.attr")
-  l <- rule[[1]]
-  str <- "("
-  if(is.vector(l$idx))
-  {
-    str <- paste0(str, cols[ l$idx[1]  ],", ", l$values[1])
-    
-    if(length(l$idx)>1)
-    {
-      for(i in 2:length(l$idx))
-      {
-        str <- paste0(str, ") & (", cols[ l$idx[i] ],", ", l$values[i])
-      }
-    }
-  }else{
-    #  str <- paste0(str, cols[l$idx],"=", l$values)
-    stop("rule $idx is not a vector")
-  }
-  
-  str <- paste0(str, ") -> (", dec,", ", l$consequent, ")")
-  
-  #c("rule"= str, "support"= l$support, "laplace"= l$laplace )
-  df <- as.data.frame(str)
-  
-  df <- cbind(df,  length(l$support) )
-  df <- cbind(df,  l$laplace[1])
-  colnames(df) <- c("rule", "supportSize", "laplace")
-  rownames(df) <- c()
-  
-  df
-}
 
-
-DJ.rules.toString.RST <- function(rules, output_format="LERS")
+DJ.rules.toString.RST <- function(rules, output_format="LERS", show_conflict_rules=TRUE)
 {
   if(is.null(rules)) {return(NULL)}
   if(as.set(class(rules)) != set("RuleSetRST","list")) { stop("Błędny parametr")}
-  #output_format = toupper(output_format)
-  #print(output_format)
-  if(output_format == "LERS") {formatter = DJ.rule.toLERSformat.RST}
-  else {formatter=DJ.rule.toString.RST}
+
+  formatter=DJ.rule.toString.RST
   
-  str <- formatter(rules[1])
+  str <- formatter(rules[1], show_conflict_rules, output_format=output_format)
   if(length(rules)>1)
     for(i in 2:length(rules)) 
     {
-      rule <- formatter(rules[i])
+      rule <- formatter(rules[i], show_conflict_rules, output_format=output_format)
       str <- rbind(str, rule)
     }
   
