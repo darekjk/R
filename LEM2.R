@@ -1,5 +1,3 @@
-library(glue)
-
 #an auxiliary function for computing laplace estimate of rule's confidence
 laplaceEstimate <- function(rule, dataS, clsVec, uniqueCls, suppIdx = NULL) {
   if (is.null(suppIdx)) {
@@ -153,7 +151,7 @@ DJ.RI.LEM2Rules.byConcepts.RST <- function(decision.table, concepts)  {
   
   rules = lapply(rules, function(x) laplaceEstimate(list(idx = x$idx, values = x$values),
                                                     decision.table, clsVec, uniqueCls, suppIdx = x$support))
-  print(rules[[1]])
+  
   attr(rules, "uniqueCls") <- as.character(sort(uniqueCls))
   attr(rules, "supportDenominator") <- nrow(decision.table)
   attr(rules, "clsProbs") <- clsFreqs/sum(clsFreqs)
