@@ -1,3 +1,5 @@
+library(glue)
+
 #an auxiliary function for computing laplace estimate of rule's confidence
 laplaceEstimate <- function(rule, dataS, clsVec, uniqueCls, suppIdx = NULL) {
   if (is.null(suppIdx)) {
@@ -11,14 +13,20 @@ laplaceEstimate <- function(rule, dataS, clsVec, uniqueCls, suppIdx = NULL) {
     tmpValues = paste(rule$values, collapse = " ")
     suppIdx = which(dataS == tmpValues)
   }
-  
+
   clsFreqs = table(clsVec[suppIdx])
   maxIdx = which.max(clsFreqs)
   nOfCorrect = clsFreqs[maxIdx]
   
   rule$consequent = names(clsFreqs)[maxIdx]
+  
+  real_cls = clsFreqs[clsFreqs>0]  # usuń klasy, które nie są powiązane z regułą
+  rule$all_consequents = names(real_cls) 
+  rule$all_clsFreqs = real_cls
+
   rule$support = as.integer(suppIdx)
   rule$laplace = (nOfCorrect + 1)/(length(suppIdx) + length(uniqueCls))
+
   return(rule)
 }
 
@@ -140,10 +148,12 @@ DJ.RI.LEM2Rules.byConcepts.RST <- function(decision.table, concepts)  {
   
   if (length(rules)==0){return(NULL)}
   
+  
   rules = unlist(rules, recursive = FALSE)
+  
   rules = lapply(rules, function(x) laplaceEstimate(list(idx = x$idx, values = x$values),
                                                     decision.table, clsVec, uniqueCls, suppIdx = x$support))
-  
+  print(rules[[1]])
   attr(rules, "uniqueCls") <- as.character(sort(uniqueCls))
   attr(rules, "supportDenominator") <- nrow(decision.table)
   attr(rules, "clsProbs") <- clsFreqs/sum(clsFreqs)
@@ -158,3 +168,39 @@ DJ.RI.LEM2Rules.byConcepts.RST <- function(decision.table, concepts)  {
 }
 
 
+predict.RuleSetRST <- function(object, newdata, ...) {
+  
+  if(!inherits(object, "RuleSetRST")) stop("The rule set does not an object from the \'RuleSetRST\' class")
+  
+  if(!inherits(newdata, "DecisionTable")) stop("Provided data should inherit from the \'DecisionTable\' class.")
+  
+  method = attr(object, "method")
+  if (!(method %in% c("indiscernibilityBasedRules", "CN2Rules", "LEM2Rules", "AQRules"))) {
+    stop("Unrecognized classification method")
+  }
+  
+  majorityCls = attr(object, "majorityCls")
+  uniqueCls = attr(object, "uniqueCls")
+  clsProbs = attr(object, "clsProbs")
+  
+  predVec = switch(method,
+                   indiscernibilityBasedRules = {
+                     ruleSet = object[order(sapply(object, function(X) X$laplace), decreasing = TRUE)]
+                     INDclasses = sapply(ruleSet, function(x) paste(unlist(x$values), collapse = " "))
+                     consequents = sapply(ruleSet, function(x) x$consequent)
+                     newdata = do.call(paste, newdata[, ruleSet[[1]]$idx, drop = FALSE])
+                     sapply(newdata, bestFirst, INDclasses, consequents, majorityCls, uniqueCls, clsProbs)
+                   },
+                   
+                   CN2Rules = apply(as.matrix(newdata), 1, firstWin, ruleSet = object),
+                   
+                   LEM2Rules = apply(as.matrix(newdata), 1, rulesVoting, ruleSet = object, ...),
+                   
+                   AQRules = apply(as.matrix(newdata), 1, rulesVoting, ruleSet = object, ...) )
+  
+  predVec <- as.data.frame(predVec)
+  rownames(predVec) <- NULL
+  colnames(predVec) <- "predictions"
+  
+  return(predVec)
+}
