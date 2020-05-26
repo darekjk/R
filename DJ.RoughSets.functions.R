@@ -179,7 +179,7 @@ DJ.rule.toString.RST <- function(rule)
   colnames(df) <- c("rule", "supportSize", "laplace")
   rownames(df) <- c()
   
-  df
+  return(df)
 }
 
 DJ.rule.toLERSformat.RST <- function(rule)
@@ -224,6 +224,7 @@ DJ.rule.toLERSformat.RST <- function(rule)
 
 DJ.rules.toString.RST <- function(rules, output_format="LERS")
 {
+  if(is.null(rules)) {return(NULL)}
   if(as.set(class(rules)) != set("RuleSetRST","list")) { stop("Błędny parametr")}
   #output_format = toupper(output_format)
   #print(output_format)
@@ -242,5 +243,5 @@ DJ.rules.toString.RST <- function(rules, output_format="LERS")
   df <- cbind(df, "RI.confidence"=RI.confidence(rules))
   rownames(df) <- c()
   
-  df
+  return(df)
 }
