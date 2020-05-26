@@ -1,6 +1,4 @@
-# Modified LEM2 function from RoughSets library, which add suuport to create rules for custom concepts
-
-# an auxiliary function for computing laplace estimate of rule's confidence
+#an auxiliary function for computing laplace estimate of rule's confidence
 laplaceEstimate <- function(rule, dataS, clsVec, uniqueCls, suppIdx = NULL) {
   if (is.null(suppIdx)) {
     if (length(rule$idx) > 1) {
@@ -135,8 +133,12 @@ DJ.RI.LEM2Rules.byConcepts.RST <- function(decision.table, concepts)  {
   rules = list()
   
   for(i in 1:length(concepts)) {
-    rules[[i]] = computeLEM2covering(as.integer(concepts[[i]]), attributeValuePairs, clsVec, uniqueCls)
+    concept = as.integer(concepts[[i]])
+    if(is.null(concept) | length(concept)==0) {next}
+    rules[[i]] = computeLEM2covering(concept, attributeValuePairs, clsVec, uniqueCls)
   }
+  
+  if (length(rules)==0){return(NULL)}
   
   rules = unlist(rules, recursive = FALSE)
   rules = lapply(rules, function(x) laplaceEstimate(list(idx = x$idx, values = x$values),
